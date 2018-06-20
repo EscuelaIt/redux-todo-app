@@ -10,12 +10,14 @@
 		<section class="todoapp">
 			<header class="header">
 				<h1>todos</h1>
-				<input class="new-todo" placeholder="What needs to be done?" autofocus>
+				<form id="form">
+					<input id="new-todo" name="text" class="new-todo" placeholder="What needs to be done?" autofocus>
+				</form>
 			</header>
 			<section class="main">
 				<input class="toggle-all" type="checkbox">
 				<label for="toggle-all">Mark all as complete</label>
-				<ul class="todo-list"></ul>
+				<ul id="todo-list" class="todo-list"></ul>
 			</section>
 			<footer class="footer">
 				<span class="todo-count"></span>
@@ -33,6 +35,7 @@
 				<button class="clear-completed">Clear completed</button>
 			</footer>
 		</section>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.0/redux.min.js"></script>
 		<script src="assets/js/app.js"></script>
 	</body>
 </html>
