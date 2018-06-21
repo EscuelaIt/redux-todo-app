@@ -4,11 +4,11 @@
 
   // your code
 
-  const { createStore } = Redux;
+  const { createStore, combineReducers } = Redux;
 
   let store;
 
-  const initialState = [
+  const todos = [
     {
       id: 1,
       completed: true,
@@ -24,24 +24,75 @@
       completed: true,
       text: 'Task 3',
     },
+    {
+      id: 4,
+      completed: true,
+      text: 'Task 3',
+    },
   ];
+
+  const initialState = {
+    todos,
+    filter: 'ALL',
+  };
 
   document.addEventListener("DOMContentLoaded", (event) => {
     initApp();  
   });
 
-  const reducer = (state, action) => {
+  const reducerFilter = (state = '', action) =>  {
     switch (action.type) {
-      case 'ADD_TASK':
-        return [...state, action.payload];
+      case 'CHANGE_FILTER':
+        const filter = action.payload.filter;
+        return filter;
       default:
         return state;
     }
   }
 
+  const reducerTodos = (state = [], action) => {
+    switch (action.type) {
+      case 'ADD_TASK':
+        return [...state, action.payload];
+      case 'DELETE_TASK':
+        const id = action.payload.id;
+        return state.filter(item => {
+          return item.id !== id;
+        })
+      default:
+        return state;
+    }
+  }
+
+  const rootReducer = combineReducers({
+    todos: reducerTodos,
+    filter: reducerFilter
+  });
+
+  const AddTask = (payload) => {
+    return {
+      type: 'ADD_TASK',
+      payload
+    }
+  }
+
+  const deleteTask = (payload) => {
+    return {
+      type: 'DELETE_TASK',
+      payload
+    }
+  }
+
+  const changeFilter = (payload) => {
+    return {
+      type: 'CHANGE_FILTER',
+      payload
+    }
+  }
+
   function initApp() {
     store = createStore(
-      reducer,
+      rootReducer,
       initialState,
       window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
     );
@@ -50,20 +101,43 @@
       event.preventDefault();
       const data = new FormData($form);
       console.log(data.get('text'));
-      const action = {
-        type: 'ADD_TASK',
-        payload: {
-          id: 12,
-          text: data.get('text'),
-          completed: false
-        }
-      };
+      const action = AddTask({
+        id: 12,
+        text: data.get('text'),
+        completed: false
+      });
       store.dispatch(action);
       const $input = document.getElementById('new-todo');
       $input.value = "";
     });
     store.subscribe(handleChange);
     render();
+
+    const actionDelete = deleteTask({
+      id: 1
+    });
+    const actionFilter = changeFilter({
+      filter: 'ACTIVE'
+    });
+    setTimeout(() => {
+      store.dispatch(actionDelete);
+    }, 3000);
+    setTimeout(() => {
+      store.dispatch(actionFilter);
+    }, 4000);
+    setTimeout(() => {
+      store.dispatch(changeFilter({
+        filter: 'COMPLETED'
+      }));
+    }, 10000); 
+    setTimeout(() => {
+      const action = AddTask({
+        id: 12,
+        text: 'tarea abc',
+        completed: true
+      });
+      store.dispatch(action);
+    }, 8000);    
   }
 
   function handleChange() {
@@ -71,7 +145,17 @@
   }
 
   function render() {
-    const todos = store.getState();
+    const state = store.getState();
+    console.log(state);
+    let todos = state.todos;
+    const filter =  state.filter;
+    console.log(filter);
+    if (filter === 'ACTIVE') {
+      todos = todos.filter(todo => !todo.completed);
+    }
+    if (filter === 'COMPLETED') {
+      todos = todos.filter(todo => todo.completed);
+    }
     renderTodos(todos);
   }
 
